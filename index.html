@@ -19,8 +19,7 @@
         .nav-pills .nav-link { font-size: 0.85rem; padding: 5px 10px; }
         .task-item { padding: 10px 0; border-bottom: 1px dashed #eee; font-size: 0.9rem; }
         .task-item:last-child { border: none; }
-        /* 시트의 '날짜' 열 텍스트 스타일 */
-        .task-info-raw { font-size: 0.8rem; color: #e63946; font-weight: 600; margin-top: 2px; }
+        .task-info-text { font-size: 0.85rem; color: #e63946; font-weight: 600; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -104,7 +103,7 @@ async function load() {
 
 function drawTT(list, targetId) {
     const box = document.getElementById(targetId);
-    if (!list) { box.innerHTML = "<p class='text-muted small'>수업 없음</p>"; return; }
+    if (!list) { box.innerHTML = "<p class='text-muted small'>정보 없음</p>"; return; }
     box.innerHTML = list.map((item, i) => {
         if(!item) return '';
         let [sub, tea] = item.split('.');
@@ -112,19 +111,18 @@ function drawTT(list, targetId) {
     }).join('');
 }
 
-// ⭐ 핵심 수정 부분: 시트의 '날짜' 열 텍스트를 그대로 가져옵니다.
+// ⭐ 과제 출력 로직 수정: 시트의 '날짜' 열(t.time)을 강조해서 보여줍니다.
 function drawTasks(tasks) {
     const box = document.getElementById('task-content');
     if (!tasks || tasks.length === 0) {
         box.innerHTML = "<p class='text-muted small'>과제 없음 🎉</p>";
         return;
     }
-    
-    // t.date(1열/과제번호)는 무시하고, t.time(2열/날짜텍스트)과 t.title(3열/과제명)을 사용
+    // 메인에는 상위 3개 표시
     box.innerHTML = tasks.slice(0, 3).map(t => `
         <div class="task-item">
             <div class="fw-semibold">${t.title}</div>
-            <div class="task-info-raw">${t.date}</div>
+            <div class="task-info-text">${t.time || ''}</div>
         </div>
     `).join('');
 }
@@ -141,11 +139,11 @@ function drawMeals(m) {
 function drawModals(data) {
     document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => `<div class="p-3 border-bottom small"><b>${m.date}</b><br>중식: ${m.lunch}</div>`).join('');
     
-    // 모달에서도 시트 텍스트 그대로 표시
+    // 모달 전체 목록도 동일하게 적용
     document.getElementById('all-tasks-list').innerHTML = data.tasks.length ? data.tasks.map(t => `
         <div class="p-3 border-bottom">
             <div class="fw-bold small">${t.title}</div>
-            <div class="task-info-raw">${t.date}</div>
+            <div class="task-info-text" style="font-size:0.75rem">${t.time || ''}</div>
         </div>
     `).join('') : "<p class='p-3 small text-muted'>과제 없음</p>";
 }
