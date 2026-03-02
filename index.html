@@ -31,6 +31,10 @@
             <div class="card p-4">
                 <h4 class="fw-bold mb-4">학교 대시보드</h4>
                 <input type="number" id="input-id" class="form-control mb-3 text-center" placeholder="학번 5자리">
+                <div class="mb-4 text-start bg-light p-3 rounded-3">
+                    <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="check-brk" checked><label class="form-check-label">조식 표시</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" id="check-din" checked><label class="form-check-label">석식 표시</label></div>
+                </div>
                 <button class="btn btn-primary w-100 fw-bold" onclick="start()">시작하기</button>
             </div>
         </div>
@@ -61,7 +65,7 @@
         </div>
 
         <div class="card p-3 order-4">
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 text-center">
                 <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalMeals">주간 급식</button>
                 <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalTasks">전체 과제</button>
                 <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalTimes">주간 시간표</button>
@@ -70,7 +74,7 @@
 
         <div class="text-center mt-2 mb-5 order-5">
             <button class="btn btn-dark btn-sm me-2 rounded-pill" onclick="copyLink()">링크 복사</button>
-            <a href="https://instagram.com/your_school" target="_blank" class="btn btn-insta btn-sm rounded-pill px-3">인스타그램</a>
+            <a href="https://instagram.com/인스타아이디" target="_blank" class="btn btn-insta btn-sm rounded-pill px-3">인스타그램</a>
         </div>
     </div>
 </div>
@@ -84,6 +88,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwn8qk77buNkiF4hpIn8qifSmtQPvuzGEYx91owQ9Shx-a_mrt-wbEdctDrRg8hBtU/exec"; 
 const params = new URLSearchParams(window.location.search);
 const id = params.get('id');
+const setting = params.get('setting') || "11"; // 기본값 조식1, 석식1
 let fullData = null;
 
 window.onload = function() {
@@ -93,7 +98,9 @@ window.onload = function() {
 
 function start() {
     const val = document.getElementById('input-id').value;
-    if (val) window.location.href = `?id=${val}`;
+    const s1 = document.getElementById('check-brk').checked ? "1" : "0";
+    const s2 = document.getElementById('check-din').checked ? "1" : "0";
+    if (val) window.location.href = `?id=${val}&setting=${s1}${s2}`;
 }
 
 async function load() {
@@ -104,7 +111,7 @@ async function load() {
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         
         drawTT(fullData.myTimetable[dayNames[now.getDay()]], 'timetable-content');
-        drawMeals(fullData.meals[0]);
+        drawMainMeals(fullData.meals[0]);
         drawTasks(fullData.tasks);
         drawModals(fullData);
         showDay(dayNames[now.getDay()] || 'Monday');
@@ -113,7 +120,7 @@ async function load() {
 
 function drawTT(list, targetId) {
     const box = document.getElementById(targetId);
-    if (!list) { box.innerHTML = "<p class='text-muted small'>정보 없음</p>"; return; }
+    if (!list) { box.innerHTML = "<p class='text-muted small'>수업 없음</p>"; return; }
     box.innerHTML = list.map((item, i) => {
         if(!item) return '';
         let [sub, tea] = item.split('.');
@@ -121,13 +128,19 @@ function drawTT(list, targetId) {
     }).join('');
 }
 
-// ⭐ 시트의 '날짜' 열(t.time) 텍스트를 제목 아래에 그대로 표시
+function drawMainMeals(m) {
+    const box = document.getElementById('meal-container');
+    if (!m) return;
+    let html = "";
+    if (setting[0] === "1") html += `<div class='card p-3'><div class='meal-title'>🍳 조식</div><div class='meal-content'>${m.breakfast||'정보없음'}</div></div>`;
+    html += `<div class='card p-3'><div class='meal-title'>🍱 중식</div><div class='meal-content'>${m.lunch||'정보없음'}</div></div>`;
+    if (setting[1] === "1") html += `<div class='card p-3'><div class='meal-title'>🍛 석식</div><div class='meal-content'>${m.dinner||'정보없음'}</div></div>`;
+    box.innerHTML = html;
+}
+
 function drawTasks(tasks) {
     const box = document.getElementById('task-content');
-    if (!tasks || tasks.length === 0) {
-        box.innerHTML = "<p class='text-muted small'>과제 없음 🎉</p>";
-        return;
-    }
+    if (!tasks || tasks.length === 0) { box.innerHTML = "<p class='text-muted small'>과제 없음 🎉</p>"; return; }
     box.innerHTML = tasks.slice(0, 3).map(t => `
         <div class="task-item">
             <div class="fw-semibold">${t.title}</div>
@@ -136,31 +149,20 @@ function drawTasks(tasks) {
     `).join('');
 }
 
-function drawMeals(m) {
-    const box = document.getElementById('meal-container');
-    if (!m) return;
-    box.innerHTML = `
-        <div class='card p-3'><div class='meal-title'>🍳 조식</div><div class='meal-content'>${m.breakfast||'정보없음'}</div></div>
-        <div class='card p-3'><div class='meal-title'>🍱 중식</div><div class='meal-content'>${m.lunch||'정보없음'}</div></div>
-        <div class='card p-3'><div class='meal-title'>🍛 석식</div><div class='meal-content'>${m.dinner||'정보없음'}</div></div>`;
-}
-
 function drawModals(data) {
-    // 1. 주간 급식: 설정(setting)에 따라 조/중/석식 필터링
+    // 주간 급식 (설정 반영)
     const showBrk = setting[0] === "1";
     const showDin = setting[1] === "1";
+    document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => `
+        <div class="p-3 border-bottom small">
+            <div class="fw-bold text-primary mb-1">${m.date}</div>
+            ${showBrk ? `<div><b>조식:</b> ${m.breakfast||'없음'}</div>` : ''}
+            <div><b>중식:</b> ${m.lunch||'없음'}</div>
+            ${showDin ? `<div><b>석식:</b> ${m.dinner||'없음'}</div>` : ''}
+        </div>
+    `).join('');
 
-    document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => {
-        let html = `<div class="p-3 border-bottom small">`;
-        html += `<div class="fw-bold text-primary mb-1">${m.date}</div>`;
-        if (showBrk) html += `<div><b>조식:</b> ${m.breakfast || '없음'}</div>`;
-        html += `<div><b>중식:</b> ${m.lunch || '없음'}</div>`;
-        if (showDin) html += `<div><b>석식:</b> ${m.dinner || '없음'}</div>`;
-        html += `</div>`;
-        return html;
-    }).join('');
-    
-    // 2. 전체 과제: 시트의 '날짜' 열(B열) 텍스트 그대로 표시
+    // 과제 목록
     document.getElementById('all-tasks-list').innerHTML = data.tasks.length ? data.tasks.map(t => `
         <div class="p-3 border-bottom">
             <div class="fw-bold small">${t.title}</div>
