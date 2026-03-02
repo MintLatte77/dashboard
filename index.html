@@ -20,6 +20,7 @@
         .task-item { padding: 10px 0; border-bottom: 1px dashed #eee; font-size: 0.9rem; }
         .task-item:last-child { border: none; }
         .task-info-text { font-size: 0.85rem; color: #e63946; font-weight: 600; margin-top: 2px; }
+        .btn-insta { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; border: none; }
     </style>
 </head>
 <body>
@@ -42,25 +43,34 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-6">
+            <div class="col-lg-6 order-1">
                 <div class="card p-4">
                     <h5 class="fw-bold mb-3">📅 오늘 시간표</h5>
                     <div id="timetable-content"></div>
                 </div>
+            </div>
+
+            <div class="col-lg-6 order-2" id="meal-container"></div>
+
+            <div class="col-lg-6 order-3">
                 <div class="card p-4">
                     <h5 class="fw-bold mb-3">📝 오늘의 과제</h5>
                     <div id="task-content"></div>
                 </div>
             </div>
-            <div class="col-lg-6" id="meal-container"></div>
         </div>
 
-        <div class="card p-3">
+        <div class="card p-3 order-4">
             <div class="d-flex gap-2">
                 <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalMeals">주간 급식</button>
                 <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalTasks">전체 과제</button>
                 <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalTimes">주간 시간표</button>
             </div>
+        </div>
+
+        <div class="text-center mt-2 mb-5 order-5">
+            <button class="btn btn-dark btn-sm me-2 rounded-pill" onclick="copyLink()">링크 복사</button>
+            <a href="https://instagram.com/your_school" target="_blank" class="btn btn-insta btn-sm rounded-pill px-3">인스타그램</a>
         </div>
     </div>
 </div>
@@ -111,14 +121,13 @@ function drawTT(list, targetId) {
     }).join('');
 }
 
-// ⭐ 과제 출력 로직 수정: 시트의 '날짜' 열(t.time)을 강조해서 보여줍니다.
+// ⭐ 시트의 '날짜' 열(t.time) 텍스트를 제목 아래에 그대로 표시
 function drawTasks(tasks) {
     const box = document.getElementById('task-content');
     if (!tasks || tasks.length === 0) {
         box.innerHTML = "<p class='text-muted small'>과제 없음 🎉</p>";
         return;
     }
-    // 메인에는 상위 3개 표시
     box.innerHTML = tasks.slice(0, 3).map(t => `
         <div class="task-item">
             <div class="fw-semibold">${t.title}</div>
@@ -138,8 +147,6 @@ function drawMeals(m) {
 
 function drawModals(data) {
     document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => `<div class="p-3 border-bottom small"><b>${m.date}</b><br>중식: ${m.lunch}</div>`).join('');
-    
-    // 모달 전체 목록도 동일하게 적용
     document.getElementById('all-tasks-list').innerHTML = data.tasks.length ? data.tasks.map(t => `
         <div class="p-3 border-bottom">
             <div class="fw-bold small">${t.title}</div>
@@ -157,6 +164,7 @@ function showDay(day, btn) {
 }
 
 function resetUser() { window.location.href = window.location.pathname; }
+function copyLink() { navigator.clipboard.writeText(window.location.href); alert("링크가 복사되었습니다!"); }
 </script>
 </body>
 </html>
