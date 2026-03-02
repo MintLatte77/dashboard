@@ -146,13 +146,27 @@ function drawMeals(m) {
 }
 
 function drawModals(data) {
-    document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => `<div class="p-3 border-bottom small"><b>${m.date}</b><br>중식: ${m.lunch}</div>`).join('');
+    // 1. 주간 급식: 설정(setting)에 따라 조/중/석식 필터링
+    const showBrk = setting[0] === "1";
+    const showDin = setting[1] === "1";
+
+    document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => {
+        let html = `<div class="p-3 border-bottom small">`;
+        html += `<div class="fw-bold text-primary mb-1">${m.date}</div>`;
+        if (showBrk) html += `<div><b>조식:</b> ${m.breakfast || '없음'}</div>`;
+        html += `<div><b>중식:</b> ${m.lunch || '없음'}</div>`;
+        if (showDin) html += `<div><b>석식:</b> ${m.dinner || '없음'}</div>`;
+        html += `</div>`;
+        return html;
+    }).join('');
+    
+    // 2. 전체 과제: 시트의 '날짜' 열(B열) 텍스트 그대로 표시
     document.getElementById('all-tasks-list').innerHTML = data.tasks.length ? data.tasks.map(t => `
         <div class="p-3 border-bottom">
             <div class="fw-bold small">${t.title}</div>
             <div class="task-info-text" style="font-size:0.75rem">${t.time || ''}</div>
         </div>
-    `).join('') : "<p class='p-3 small text-muted'>과제 없음</p>";
+    `).join('') : "<p class='p-3 small text-muted text-center'>과제 없음</p>";
 }
 
 function showDay(day, btn) {
