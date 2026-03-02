@@ -3,39 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리 학교 대시보드</title>
+    <title>학교 대시보드</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         body { background-color: #f1f3f5; font-family: "Pretendard Variable", sans-serif; letter-spacing: -0.02em; }
-        .card { border-radius: 20px; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.04); margin-bottom: 20px; }
-        .meal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: #333; }
-        .meal-content { white-space: pre-wrap; line-height: 1.7; color: #495057; font-size: 0.95rem; }
-        .teacher-tag { font-size: 0.85rem; color: #adb5bd; margin-left: 6px; }
+        .card { border-radius: 18px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .meal-title { font-size: 1rem; font-weight: 700; margin-bottom: 5px; }
+        .meal-content { white-space: pre-wrap; font-size: 0.9rem; color: #495057; }
+        .tt-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid #eee; }
+        .tt-num { font-weight: 800; color: #4dabf7; width: 25px; }
+        .tt-sub { flex-grow: 1; margin-left: 10px; font-weight: 500; }
+        .tt-tea { font-size: 0.8rem; color: #adb5bd; text-align: right; }
         .hidden { display: none !important; }
-        .btn-insta { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; border: none; }
+        .nav-pills .nav-link { font-size: 0.85rem; padding: 5px 10px; }
     </style>
 </head>
 <body>
 
 <div class="container mt-4">
     <div id="login-section" class="row justify-content-center hidden">
-        <div class="col-md-5">
-            <div class="card p-4 text-center">
-                <h3 class="fw-bold mb-4">로그인</h3>
+        <div class="col-md-5 mt-5 text-center">
+            <div class="card p-4">
+                <h4 class="fw-bold mb-4">학교 대시보드</h4>
                 <input type="number" id="input-id" class="form-control mb-3 text-center" placeholder="학번 5자리">
-                <div class="mb-4 text-start bg-light p-3 rounded-3">
-                    <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="check-brk" checked><label class="form-check-label">조식 표시</label></div>
-                    <div class="form-check"><input class="form-check-input" type="checkbox" id="check-din" checked><label class="form-check-label">석식 표시</label></div>
-                </div>
-                <button class="btn btn-primary w-100 fw-bold" onclick="startDashboard()">확인</button>
+                <button class="btn btn-primary w-100 fw-bold" onclick="start()">시작하기</button>
             </div>
         </div>
     </div>
 
     <div id="dashboard-section" class="hidden">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold m-0" id="user-info">로딩 중...</h2>
+            <h3 class="fw-bold m-0">학교 대시보드</h3>
             <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="resetUser()">정보 수정</button>
         </div>
 
@@ -43,126 +42,103 @@
             <div class="col-lg-6">
                 <div class="card p-4">
                     <h5 class="fw-bold mb-3">📅 오늘 시간표</h5>
-                    <div id="timetable-content" class="meal-content">데이터 로딩 중...</div>
+                    <div id="timetable-content"></div>
                 </div>
             </div>
             <div class="col-lg-6" id="meal-container"></div>
         </div>
 
-        <div class="card p-4">
-            <h5 class="fw-bold mb-3">🔍 전체 데이터</h5>
-            <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-light border btn-sm" data-bs-toggle="modal" data-bs-target="#modalAllMeals">이번 주 급식(5일)</button>
-                <button class="btn btn-light border btn-sm" data-bs-toggle="modal" data-bs-target="#modalAllTasks">전체 과제</button>
-                <button class="btn btn-light border btn-sm" data-bs-toggle="modal" data-bs-target="#modalAllTimes">일주일 시간표</button>
+        <div class="card p-3">
+            <div class="d-flex gap-2">
+                <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalMeals">주간 급식</button>
+                <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalTasks">과제 목록</button>
+                <button class="btn btn-light border btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalTimes">주간 시간표</button>
             </div>
-        </div>
-
-        <div class="text-center mt-2 mb-5">
-            <button class="btn btn-dark btn-sm me-2 rounded-pill" onclick="copyLink()">링크 복사</button>
-            <a href="https://instagram.com/학교계정" target="_blank" class="btn btn-insta btn-sm rounded-pill px-3">인스타그램</a>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalAllMeals" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">이번 주 급식 목록</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="all-meals-list"></div></div></div></div>
-<div class="modal fade" id="modalAllTasks" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">전체 과제 목록</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="all-tasks-list"></div></div></div></div>
-<div class="modal fade" id="modalAllTimes" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">내 주간 시간표</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="all-times-list"></div></div></div></div>
+<div class="modal fade" id="modalTimes" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header border-0"><h5 class="modal-title fw-bold">주간 시간표</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body pt-0">
+        <ul class="nav nav-pills nav-fill mb-3 bg-light rounded p-1" id="week-tab">
+            <li class="nav-item"><button class="nav-link active" onclick="showDay('Monday', this)">월</button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showDay('Tuesday', this)">화</button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showDay('Wednesday', this)">수</button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showDay('Thursday', this)">목</button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showDay('Friday', this)">금</button></li>
+        </ul>
+        <div id="week-tt-content"></div>
+    </div>
+</div></div></div>
+
+<div class="modal fade" id="modalMeals" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">주간 급식</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="all-meals-list"></div></div></div></div>
+<div class="modal fade" id="modalTasks" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">과제 목록</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="all-tasks-list"></div></div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwn8qk77buNkiF4hpIn8qifSmtQPvuzGEYx91owQ9Shx-a_mrt-wbEdctDrRg8hBtU/exec"; 
 const params = new URLSearchParams(window.location.search);
 const id = params.get('id');
-const setting = params.get('setting') || "11";
+let fullData = null;
 
 window.onload = function() {
     if (!id) document.getElementById('login-section').classList.remove('hidden');
-    else { document.getElementById('dashboard-section').classList.remove('hidden'); loadData(); }
+    else { document.getElementById('dashboard-section').classList.remove('hidden'); load(); }
 };
 
-function startDashboard() {
+function start() {
     const val = document.getElementById('input-id').value;
-    const s1 = document.getElementById('check-brk').checked ? "1" : "0";
-    const s2 = document.getElementById('check-din').checked ? "1" : "0";
-    if (val) window.location.href = `?id=${val}&setting=${s1}${s2}`;
+    if (val) window.location.href = `?id=${val}`;
 }
 
-async function loadData() {
+async function load() {
     try {
-        const response = await fetch(`${API_URL}?id=${id}`);
-        const data = await response.json();
-        document.getElementById('user-info').innerText = `${id}의 대시보드`;
-
+        const res = await fetch(`${API_URL}?id=${id}`);
+        fullData = await res.json();
         const now = new Date();
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         
-        renderTimetable(data.myTimetable, dayNames[now.getDay()]);
-        
-        // 1. 메인 페이지 급식: 시트의 맨 첫 번째 데이터(index 0) 표시
-        renderMainMeal(data.meals[0]);
-        
-        // 2. 모달 데이터 렌더링
-        renderModals(data);
+        drawTT(fullData.myTimetable[dayNames[now.getDay()]], 'timetable-content');
+        drawMeals(fullData.meals[0]);
+        drawModals(fullData);
+        showDay(dayNames[now.getDay()] || 'Monday'); // 모달 초기값
     } catch (e) { console.error(e); }
 }
 
-function renderTimetable(timetable, day) {
-    const container = document.getElementById('timetable-content');
-    if (!timetable || !timetable[day]) { container.innerText = "수업 없음"; return; }
-    let html = "";
-    timetable[day].forEach((item, idx) => {
-        if (!item || item.trim() === "") return;
-        let [sub, teacher] = item.split('.');
-        html += `<div class='p-2 border-bottom'><b>${idx+1}교시:</b> ${sub} ${teacher ? `<span class='teacher-tag'>| ${teacher}</span>` : ''}</div>`;
-    });
-    container.innerHTML = html;
+function drawTT(list, targetId) {
+    const box = document.getElementById(targetId);
+    if (!list) { box.innerHTML = "수업 없음"; return; }
+    box.innerHTML = list.map((item, i) => {
+        if(!item) return '';
+        let [sub, tea] = item.split('.');
+        return `<div class="tt-row"><span class="tt-num">${i+1}</span><span class="tt-sub">${sub}</span><span class="tt-tea">${tea||''}</span></div>`;
+    }).join('');
 }
 
-function renderMainMeal(m) {
-    const container = document.getElementById('meal-container');
-    if (!m) { container.innerHTML = "<div class='card p-4'>급식 정보 없음</div>"; return; }
-    
-    let html = "";
-    // 맨 윗줄 날짜 표시
-    html += `<div class='text-muted small mb-2 px-2'>오늘의 급식 (${m.date})</div>`;
-    
-    if (setting[0] === "1") html += `<div class='card p-4'><div class='meal-title'>🍳 조식</div><div class='meal-content'>${m.breakfast || '정보 없음'}</div></div>`;
-    html += `<div class='card p-4'><div class='meal-title'>🍱 중식</div><div class='meal-content'>${m.lunch || '정보 없음'}</div></div>`;
-    if (setting[1] === "1") html += `<div class='card p-4'><div class='meal-title'>🍛 석식</div><div class='meal-content'>${m.dinner || '정보 없음'}</div></div>`;
-    container.innerHTML = html;
+function drawMeals(m) {
+    const box = document.getElementById('meal-container');
+    if (!m) return;
+    box.innerHTML = `
+        <div class='card p-3'><div class='meal-title'>🍳 조식</div><div class='meal-content'>${m.breakfast||'정보없음'}</div></div>
+        <div class='card p-3'><div class='meal-title'>🍱 중식</div><div class='meal-content'>${m.lunch||'정보없음'}</div></div>
+        <div class='card p-3'><div class='meal-title'>🍛 석식</div><div class='meal-content'>${m.dinner||'정보없음'}</div></div>`;
 }
 
-function renderModals(data) {
-    // 급식: 상위 5개만
-    document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => `
-        <div class="p-3 border-bottom">
-            <div class="fw-bold text-primary small mb-1">${m.date}</div>
-            <div class="small"><b>중식:</b> ${m.lunch}</div>
-        </div>
-    `).join('');
+function drawModals(data) {
+    document.getElementById('all-meals-list').innerHTML = data.meals.slice(0, 5).map(m => `<div class="p-3 border-bottom small"><b>${m.date}</b><br>중식: ${m.lunch}</div>`).join('');
+    document.getElementById('all-tasks-list').innerHTML = data.tasks.length ? data.tasks.map(t => `<div class="p-3 border-bottom small"><b>${t.title}</b><br>${t.date} | ${t.time}</div>`).join('') : "<p class='p-3 small'>과제 없음</p>";
+}
 
-    // 과제: 전체
-    document.getElementById('all-tasks-list').innerHTML = data.tasks.map(t => `
-        <div class="p-3 border-bottom">
-            <div class="fw-bold small">${t.title}</div>
-            <div class="text-muted" style="font-size:0.8rem">${t.date} | ${t.time}</div>
-        </div>
-    `).join('');
-
-    // 시간표: 월~금
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-    const dayKr = ["월", "화", "수", "목", "금"];
-    document.getElementById('all-times-list').innerHTML = days.map((d, i) => `
-        <div class="p-3 border-bottom">
-            <div class="fw-bold text-info small mb-1">${dayKr[i]}요일</div>
-            <div class="small">${data.myTimetable[d] ? data.myTimetable[d].filter(x => x).join(' / ') : '정보 없음'}</div>
-        </div>
-    `).join('');
+function showDay(day, btn) {
+    if (btn) {
+        document.querySelectorAll('#week-tab .nav-link').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+    drawTT(fullData.myTimetable[day], 'week-tt-content');
 }
 
 function resetUser() { window.location.href = window.location.pathname; }
-function copyLink() { navigator.clipboard.writeText(window.location.href); alert("링크가 복사되었습니다!"); }
 </script>
 </body>
 </html>
